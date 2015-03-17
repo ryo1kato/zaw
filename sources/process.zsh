@@ -2,11 +2,7 @@
 
 function zaw-src-process () {
     local ps_list title ps pid_list
-    if [ $(uname) = "Darwin" ] ; then       # for Macintosh
-        ps_list="$(ps aux | awk '$11 !~ /^\[/ {print $0}')"              # filter out kernel processes
-    else
-        ps_list="$(ps -aux --sort args | awk '$11 !~ /^\[/ {print $0}')" # filter out kernel processes
-    fi
+    ps_list="$(ps -eo 'user,pid,%cpu,%mem,time,command' | awk '$6 !~ /^\[/ {print $0}')"  # filter out kernel processes
     title="${${(f)ps_list}[1]}"
     ps="$(echo $ps_list | sed '1d')"
     pid_list="$(echo $ps | awk '{print $2}')"
@@ -26,9 +22,8 @@ function zaw-src-process-kill () {
     if [[ $user = $USER ]]; then
         BUFFER="kill $1"
     else
-        BUFFER="sudo kill $1"
+        BUFFER=": sudo kill $1"
     fi
-    zle accept-line
 }
 
 zaw-register-src -n process zaw-src-process
